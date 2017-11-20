@@ -17,7 +17,7 @@ namespace WindowsFormsApplication1
         string mysign;
 
         ServerController sc;
-        Class1 cc;
+        ClientController cc;
         public GameWindow()
         {
             InitializeComponent();
@@ -25,7 +25,12 @@ namespace WindowsFormsApplication1
             mysign = "X";
             turn = true;
             sc = new ServerController();
-            cc = new Class1();
+            cc = new ClientController();
+
+            
+
+
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
         }
 
         private void button_Click(object sender, EventArgs e)
@@ -47,9 +52,9 @@ namespace WindowsFormsApplication1
 
                 if (turn)
                     b.Text = mysign;
-
-                pressed_tiles.Add(Convert.ToInt32(id));
                 
+                pressed_tiles.Add(Convert.ToInt32(id));
+                //cc.sendMove(new Move());
                 turn = false;
                 
             }
@@ -58,11 +63,48 @@ namespace WindowsFormsApplication1
 
         private void WaitScreen()
         {
-            sc.receiveMove();
+            Move m = sc.receiveMove();
         }
 
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            int x_click = 0;
+            int y_click = 0;
+            int posx = MousePosition.X -this.Location.X;
+            int posy = MousePosition.Y - this.Location.Y;
 
+
+            if (posx <= pictureBox1.Width / 3)
+            {
+                x_click = 1;
+            }
+            else if(posx >= (pictureBox1.Width /3) && posx <= ((pictureBox1.Width / 3) * 2))
+            {
+                x_click = 2;
+            }
+            else if(posx >= ((pictureBox1.Width / 3) *2))
+            {
+                x_click = 3;
+            }
+
+            if (posy <= pictureBox1.Width / 3)
+            {
+                y_click = 1;
+            }
+            else if (posy >= (pictureBox1.Width / 3) && posy <= ((pictureBox1.Width / 3) * 2))
+            {
+                y_click = 2;
+            }
+            else if (posy >= ((pictureBox1.Width / 3) * 2))
+            {
+                y_click = 3;
+            }
+
+
+            MessageBox.Show("x:"+x_click.ToString() +" y:"+ y_click);
+            MessageBox.Show("x:" +posx + " y:" + MousePosition.Y);
 
         }
+    }
     }
 

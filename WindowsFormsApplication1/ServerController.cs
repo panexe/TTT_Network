@@ -14,9 +14,9 @@ public class ServerController
     public ServerController()
 	{
         PORT = 50500;
-        
+         
 	}
-    public void receiveMove()
+    public Move receiveMove()
     {
         Move move = new Move();
         try
@@ -32,25 +32,30 @@ public class ServerController
                 {
                     move.Tile = Convert.ToInt32(s);
                     clientSocket.write("OK");
+                    return move;
                 }
                 else
                 {
                     clientSocket.write("FAIL");
+                    return null;
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+                return null;
             }
         }catch(Exception ex)
         {
             MessageBox.Show(ex.Message);
-            
+            return null;
+
         }
         finally
         {
             clientSocket.close();
             serverSocket.close();
+            
         }
     }
 }

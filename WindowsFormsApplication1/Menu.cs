@@ -16,6 +16,7 @@ namespace WindowsFormsApplication1
         {
             InitializeComponent();
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -55,6 +56,7 @@ namespace WindowsFormsApplication1
             if (posx < ((pictureBox1.Size.Width / 3)*2))
             {
                 x_button = 1;
+
             }
             else if (posx > ((pictureBox1.Size.Width / 3) * 2))
             {

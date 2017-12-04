@@ -12,6 +12,7 @@ namespace WindowsFormsApplication1
 {
     public partial class GameWindow : Form
     {
+        List<PictureBox> pboxs_xo;
         List<int> pressed_tiles;
         bool turn;
         string mysign;
@@ -26,9 +27,26 @@ namespace WindowsFormsApplication1
             turn = true;
             sc = new ServerController();
             cc = new ClientController();
+            pboxs_xo = new List<PictureBox>();
+            pboxs_xo.Add(pbox_A1);
+            pboxs_xo.Add(pbox_A2);
+            pboxs_xo.Add(pbox_A3);
+            pboxs_xo.Add(pbox_B1);
+            pboxs_xo.Add(pbox_B2);
+            pboxs_xo.Add(pbox_B3);
+            pboxs_xo.Add(pbox_C1);
+            pboxs_xo.Add(pbox_C2);
+            pboxs_xo.Add(pbox_C3);
+            foreach(PictureBox p in pboxs_xo)
+            {
+                pictureBox1.Controls.Add(p);
+                p.BackColor = Color.Transparent;
+                p.SizeMode = PictureBoxSizeMode.StretchImage;
+                
+            }
 
-            
-
+            pictureBox1.Controls.Add(pbox_A2);
+            pbox_A2.SizeMode = PictureBoxSizeMode.StretchImage;
 
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
         }
@@ -99,10 +117,28 @@ namespace WindowsFormsApplication1
             {
                 y_click = 3;
             }
+            button_press(y_click,x_click);
+
+            //MessageBox.Show("x:"+x_click.ToString() +" y:"+ y_click);
+            //MessageBox.Show("x:" +posx + " y:" + MousePosition.Y);
+
+        }
+        
+        private void button_press(int row , int line)
+        {
+            int a = 0;
+            a = (row - 1) * 3 + (line-1);
 
 
-            MessageBox.Show("x:"+x_click.ToString() +" y:"+ y_click);
-            MessageBox.Show("x:" +posx + " y:" + MousePosition.Y);
+            if (!turn)
+            {
+                pboxs_xo[a].Image = Properties.Resources.x_image_png;
+                turn = !turn;               
+                    }
+            else {
+                pboxs_xo[a].Image = Properties.Resources.o_image_png1;
+                turn = !turn;
+            }
 
         }
     }

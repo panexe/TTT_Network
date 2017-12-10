@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CS;
 
 namespace WindowsFormsApplication1
 {
@@ -15,17 +16,25 @@ namespace WindowsFormsApplication1
         List<PictureBox> pboxs_xo;
         List<int> pressed_tiles;
         bool turn;
+        bool host;
+        
         string mysign;
+        BoardState bstate;
 
         ServerController sc;
         ClientController cc;
         public GameWindow()
         {
+            host = true;
+            if (host) { mysign = "x"; }
+            else{ mysign = "o"; }
+
             InitializeComponent();
             pressed_tiles = new List<int>();
+            bstate = new BoardState();
             mysign = "X";
             turn = true;
-            sc = new ServerController();
+
             cc = new ClientController();
             pboxs_xo = new List<PictureBox>();
             pboxs_xo.Add(pbox_A1);
@@ -49,6 +58,43 @@ namespace WindowsFormsApplication1
             pbox_A2.SizeMode = PictureBoxSizeMode.StretchImage;
 
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+
+            
+        }
+
+        public void updateBoard()
+        {
+            sc = new ServerController();
+            BoardState b = new BoardState(sc.receiveBoard());
+               
+
+
+
+            // Setzt alle Tiles zum Boardstate (x&os)
+            int temp = 0;
+            for(int i = 0; i < 3; i++)
+            {
+                for(int u = 0; u < 3; u++)
+                {
+                    if(b.board[i, u] == 1)
+                    {
+                        pboxs_xo[temp].Image = Properties.Resources.x_image_png;
+                    }
+                    else if(b.board[i, u] == 2)
+                    {
+                        pboxs_xo[temp].Image = Properties.Resources.o_image_png1;
+                    }
+                    else if (b.board[i, u] == 0)
+                    {
+                        pboxs_xo[temp].Image = null;
+                    }
+                    temp++;
+                }
+            }
+            bstate = b;
+            // Lässt diesen spieler wieder einen zug machen 
+            turn = true;
+            
         }
 
         private void button_Click(object sender, EventArgs e)
@@ -81,7 +127,7 @@ namespace WindowsFormsApplication1
 
         private void WaitScreen()
         {
-            Move m = sc.receiveMove();
+            
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
@@ -123,23 +169,78 @@ namespace WindowsFormsApplication1
             //MessageBox.Show("x:" +posx + " y:" + MousePosition.Y);
 
         }
-        
-        private void button_press(int row , int line)
+
+        private void button_press(int row, int line)
         {
             int a = 0;
-            a = (row - 1) * 3 + (line-1);
+            a = (row - 1) * 3 + (line - 1);
 
-
-            if (!turn)
+            if (pboxs_xo[a].Image == null && host)
             {
-                pboxs_xo[a].Image = Properties.Resources.x_image_png;
-                turn = !turn;               
+                if (turn)
+                {
+                    pboxs_xo[a].Image = Properties.Resources.x_image_png;
+                    turn = !turn;
+
+
+                    // Nicht ideal weil doppelter rechenaufwand 
+                    
+                    try
+                    {
+                        bstate.board[convertatoxy(a)[0], convertatoxy(a)[1]] = 1;
+
+                        cc.sendBoard(bstate);
+                    }catch(Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
                     }
-            else {
+                    updateBoard();
+
+                }
+                else
+                {
+                    // wait for player 
+
+
+                    //pboxs_xo[a].Image = Properties.Resources.o_image_png1;
+                    //turn = !turn;
+                }
+            }
+            else if(pboxs_xo[a].Image == null && host && turn)
+            {
                 pboxs_xo[a].Image = Properties.Resources.o_image_png1;
                 turn = !turn;
+                bstate.board[convertatoxy(a)[0], convertatoxy(a)[1]] = 2;
+                cc.sendBoard(bstate);
+                updateBoard();
             }
 
+
+        }
+
+        private int[] convertatoxy(int a)
+        {
+            int[] sum = new int[3];
+            int temp = 0;
+            if(a < 4)
+            {
+                sum[0] = 0;
+                temp = a - 1;
+                sum[1] = temp;
+            }
+            else if(a>3 && a < 7)
+            {
+                sum[0] = 1;
+                temp = a - 4;
+                sum[1] = temp;
+            }
+            else if(a > 6)
+            {
+                sum[0] = 2;
+                temp = a - 7;
+                sum[1] = temp;
+            }
+            return sum;
         }
     }
     }

@@ -1,11 +1,11 @@
 ﻿using System;
-using __ClientSocket__;
 using WindowsFormsApplication1;
 using System.Windows.Forms;
+using Server;
 
 public class ClientController
 {
-    ClientSocket clientSocket;
+    Server.ClientSocket clientSocket;
     int PORT;
     string ip;
     Move move;
@@ -15,45 +15,22 @@ public class ClientController
         PORT = 50500;
         ip = "localhost";
 
-        move = new Move();
 
-        clientSocket = new ClientSocket(ip, PORT);
+
+        clientSocket = new ClientSocket(PORT);
 
     }
 
-    public bool sendMove(Move _move)
+    public void sendBoard(CS.BoardState b)
     {
-        try
-        {
-            // vebindet
-            clientSocket = new ClientSocket(ip, PORT);
-            try
-            {
-                clientSocket.write(_move.Tile);
-                if (clientSocket.readLine() == "OK")
-                {
-                    clientSocket.close();
-                    return true;
-                }
-                else
-                {
-                    clientSocket.close();
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(ex.Message);
-        }
-        finally
-        {
+        clientSocket.connect();
 
+        for (int i = 0; i < 2; i++)
+        {
+            for (int u = 0; u < 2; u++)
+            {
+                clientSocket.write(Convert.ToString(b.board[i, u]));
+            }
         }
-        return false;
     }
 }

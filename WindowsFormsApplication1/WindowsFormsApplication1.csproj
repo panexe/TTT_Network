@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BoardState.cs" />
     <Compile Include="ClientController.cs" />
     <Compile Include="ClientSocket.cs" />
     <Compile Include="Menu.cs">

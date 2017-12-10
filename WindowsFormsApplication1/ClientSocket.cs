@@ -1,97 +1,92 @@
 ﻿using System;
-using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace __ClientSocket__
+namespace Server
 {
-    class ClientSocket
+    public class ClientSocket
     {
-        private string host = "";
-        private int port = 0;
-        private Socket socket = null;
-        private System.Net.IPEndPoint ep = null;
-        IPHostEntry hostInfo = null;
+        byte[] bytes = new byte[1024];
 
-        public ClientSocket(string host, int port)
+        Socket sender;
+
+        IPHostEntry ipHostInfo;
+        IPAddress ipAddress;
+        IPEndPoint remoteEP;
+        bool connected;
+        public ClientSocket(int port)
         {
-            hostInfo = Dns.GetHostByName(host);
-            ep = new IPEndPoint(hostInfo.AddressList[0], port);
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            connected = false;
+            ipHostInfo = Dns.Resolve(Dns.GetHostName());
+            ipAddress = ipHostInfo.AddressList[0];
+            remoteEP = new IPEndPoint(ipAddress, port);
+
+            sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
-        public ClientSocket(Socket socket)
+
+        public void start()
         {
-            this.socket = socket;
+
         }
+
         public bool connect()
         {
-            bool rc = false;
-
             try
             {
-                socket.Connect(ep);
-                rc = true;
+                sender.Connect(remoteEP);
+                //Console.WriteLine("Verbunden!");
+                connected = true;
+                return true;
+
             }
             catch (Exception ex)
             {
-                throw ex;
+                //Console.WriteLine(ex.Message);
+                connected = false;
+                return false;
             }
 
-            return rc;
         }
-        public int dataAvailable()
+
+        public void write(string text)
         {
-            return socket.Available;
+            if (connected)
+            {
+                //byte[] msg = Encoding.ASCII.GetBytes(text+"<EOT>");
+                byte[] msg = Encoding.ASCII.GetBytes(text);
+                int bytesSent = sender.Send(msg);
+            }
+            
         }
-        public void write(int b)
-        {
-            byte[] msg = new byte[1];
-            msg[0] = (byte)b;
-            socket.Send(msg);
-        }
-        public void write(byte[] b, int len)
-        {
-            socket.Send(b, len, SocketFlags.None);
-        }
-        public void write(string s)
-        {
-            byte[] msg = Encoding.Unicode.GetBytes(s);
-            socket.Send(msg);
-        }
-        public int read()
-        {
-            byte[] rcvbuffer = new byte[1];
-            socket.Receive(rcvbuffer, 1, SocketFlags.None);
-            return Convert.ToInt32(rcvbuffer[0]);
-        }
-        public int read(byte[] b, int len)
-        {
-            return socket.Receive(b, len, SocketFlags.None);
-        }
+
         public string readLine()
         {
-            byte[] rcvbuffer = new byte[256];
-            socket.Receive(rcvbuffer);
-            ASCIIEncoding enc = new ASCIIEncoding();
-            
-            string rcv = "";
-
-            foreach (byte b in rcvbuffer)
+            try
             {
-                if (b != '\0')
-                    rcv += (char)b;
+                string s;
+                int bytesRec = sender.Receive(bytes);
+                s = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                Console.WriteLine(s);
+                return s;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+            finally
+            {
+                sender.Shutdown(SocketShutdown.Both);
+                sender.Close();
+
+
             }
 
-            if (rcv.Substring(rcv.Length - 1) == "\n")
-                rcv = rcv.Remove(rcv.Length - 1, 1);
-
-            return rcv;
-        }
-        public void close()
-        {
-            socket.Close();
-            socket = null;
         }
     }
 }
